@@ -3,6 +3,7 @@ package com.dedykuncoro.login;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -49,6 +50,12 @@ public class Login extends AppCompatActivity {
 
     String tag_json_obj = "json_obj_req";
 
+    SharedPreferences sharedpreferences;
+    Boolean session = false;
+    String id, username;
+    public static final String my_shared_preferences = "my_shared_preferences";
+    public static final String session_status = "session_status";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +76,21 @@ public class Login extends AppCompatActivity {
         btn_register = (Button) findViewById(R.id.btn_register);
         txt_username = (EditText) findViewById(R.id.txt_username);
         txt_password = (EditText) findViewById(R.id.txt_password);
+
+        // Cek session login jika TRUE maka langsung buka MainActivity
+        sharedpreferences = getSharedPreferences(my_shared_preferences, Context.MODE_PRIVATE);
+        session = sharedpreferences.getBoolean(session_status, false);
+        id = sharedpreferences.getString(TAG_ID, null);
+        username = sharedpreferences.getString(TAG_USERNAME, null);
+
+        if (session) {
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            intent.putExtra(TAG_ID, id);
+            intent.putExtra(TAG_USERNAME, username);
+            finish();
+            startActivity(intent);
+        }
+
 
         btn_login.setOnClickListener(new View.OnClickListener() {
 
@@ -131,12 +153,17 @@ public class Login extends AppCompatActivity {
 
                         Log.e("Successfully Login!", jObj.toString());
 
-                        Toast.makeText(getApplicationContext(),
-                                jObj.getString(TAG_MESSAGE), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), jObj.getString(TAG_MESSAGE), Toast.LENGTH_LONG).show();
+
+                        // menyimpan login ke session
+                        SharedPreferences.Editor editor = sharedpreferences.edit();
+                        editor.putBoolean(session_status, true);
+                        editor.putString(TAG_ID, id);
+                        editor.putString(TAG_USERNAME, username);
+                        editor.commit();
 
                         // Memanggil main activity
-                        Intent intent = new Intent(Login.this,
-                                MainActivity.class);
+                        Intent intent = new Intent(Login.this, MainActivity.class);
                         intent.putExtra(TAG_ID, id);
                         intent.putExtra(TAG_USERNAME, username);
                         finish();
