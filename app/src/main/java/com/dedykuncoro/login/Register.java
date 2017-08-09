@@ -177,4 +177,10 @@ public class Register extends AppCompatActivity {
             pDialog.dismiss();
     }
 
+    @Override
+    public void onBackPressed() {
+        intent = new Intent(Register.this, Login.class);
+        finish();
+        startActivity(intent);
+    }
 }
